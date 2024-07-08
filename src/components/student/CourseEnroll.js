@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 
 // students displays a list of open sections for a 
 // use the URL /sections/open

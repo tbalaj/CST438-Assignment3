@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 
 // students gets a list of all courses taken and grades
 // use the URL /transcript?studentId=
