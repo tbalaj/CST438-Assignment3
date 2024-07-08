@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 
 // student can view schedule of sections 
 // use the URL /enrollment?studentId=3&year= &semester=

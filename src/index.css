@@ -11,3 +11,27 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.Center {
+  width: 100%;
+  margin: auto;
+  overflow-x: auto; /* Ensures the table is responsive */
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #032230; /* Example color */
+  color: white; 
+  margin: auto;
+  text-align: center;
+}
+
+.ButtonLink {
+  text-decoration: none;
+  color: inherit;
+}

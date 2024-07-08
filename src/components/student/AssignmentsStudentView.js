@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 
 // student views a list of assignments and assignment grades 
 // use the URL  /assignments?studentId= &year= &semester=
