@@ -17,7 +17,6 @@ import AssignmentAdd from './AssignmentAdd';
 // assignment id, title, dueDate and buttons to grade, edit, delete each assignment
 
 const AssignmentsView = () => {
-
     const location = useLocation();
     const { secNo, courseId, secId } = location.state;
     const [assignments, setAssignments] = useState([]);
@@ -28,7 +27,7 @@ const AssignmentsView = () => {
             const response = await fetch(`${SERVER_URL}/sections/${secNo}/assignments`);
             if (response.ok) {
                 const data = await response.json();
-                setAssignments(data); 
+                setAssignments(data);
             } else {
                 console.error('Failed to fetch assignments:', response.statusText);
             }
@@ -36,48 +35,70 @@ const AssignmentsView = () => {
             console.error('Error fetching assignments:', error);
         }
     };
+
     useEffect(() => {
-
         fetchAssignments();
-    }, []);
+    }, [secNo]);
 
-  
-    const handleDelete = (assignmentId) => {
-        console.log('Deleting assignment:', assignmentId);
+    // Handle delete action
+    const handleDelete = async (assignmentId) => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this assignment?');
+        if (confirmDelete) {
+            try {
+                const response = await fetch(`${SERVER_URL}/assignments/${assignmentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (response.ok) {
+                    console.log('Assignment deleted successfully');
+                    fetchAssignments(); // Refresh the assignment list
+                } else {
+                    const errorText = await response.text();
+                    console.error('Failed to delete assignment:', errorText);
+                    alert('Failed to delete assignment. Please check the server logs for more details.');
+                }
+            } catch (error) {
+                console.error('Error deleting assignment:', error);
+                alert('Error deleting assignment. Please check your network connection or try again later.');
+            }
+        }
     };
 
     return (
         <>
-        <h3>Assignments for Section {secNo}</h3>
-        <AssignmentAdd/>
-        <TableContainer component={Paper}>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Assignment ID</TableCell>
-                        <TableCell>Title</TableCell>
-                        <TableCell>Due Date</TableCell>
-                        <TableCell>Actions</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {assignments.map((assignment) => (
-                        <TableRow key={assignment.id}>
-                            <TableCell>{assignment.id}</TableCell>
-                            <TableCell>{assignment.title}</TableCell>
-                            <TableCell>{assignment.dueDate}</TableCell>
-                            <TableCell>
-                                <AssignmentGrade assignment={assignment} refresh={fetchAssignments}/>
-                                <AssignmentUpdate assignment={assignment} refresh={fetchAssignments}/>
-                                <Button onClick={() => handleDelete(assignment.id)} color="secondary">Delete</Button>
-                            </TableCell>
+            <h3>Assignments for Section {secNo}</h3>
+            <AssignmentAdd refresh={fetchAssignments}/>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Assignment ID</TableCell>
+                            <TableCell>Title</TableCell>
+                            <TableCell>Due Date</TableCell>
+                            <TableCell>Actions</TableCell>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
-    </>
+                    </TableHead>
+                    <TableBody>
+                        {assignments.map((assignment) => (
+                            <TableRow key={assignment.id}>
+                                <TableCell>{assignment.id}</TableCell>
+                                <TableCell>{assignment.title}</TableCell>
+                                <TableCell>{assignment.dueDate}</TableCell>
+                                <TableCell>
+                                    <AssignmentGrade assignment={assignment} refresh={fetchAssignments}/>
+                                    <AssignmentUpdate assignment={assignment} refresh={fetchAssignments}/>
+                                    <Button onClick={() => handleDelete(assignment.id)} color="secondary">Delete</Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </>
     );
-}
+};
 
 export default AssignmentsView;
