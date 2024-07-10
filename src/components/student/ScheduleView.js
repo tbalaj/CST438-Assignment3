@@ -80,14 +80,14 @@ const ScheduleView = (props) => {
             setSearch({...search,  [event.target.name]:event.target.value});
         }
 
-        const onDelete = (SecNo) => {
+        const onDelete = (enrollmentId) => {
           confirmAlert({
               title: 'Confirm!',
               message: 'Delete?',
               buttons: [
                 {
                   label: 'Yes',
-                  onClick: () => deleteSchedule(SecNo)
+                  onClick: () => deleteSchedule(enrollmentId)
                 },
                 {
                   label: 'No',
