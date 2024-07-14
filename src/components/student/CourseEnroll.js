@@ -1,122 +1,106 @@
 import React, {useState, useEffect} from 'react';
-import {confirmAlert} from "react-confirm-alert";
-import {SERVER_URL} from '../../Constants';
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import Button from '@mui/material/Button';
-
-
-// students displays a list of open sections for a 
-// use the URL /sections/open
-// the REST api returns a list of SectionDTO objects
-
-// the student can select a section and enroll
-// issue a POST with the URL /enrollments/sections/{secNo}?studentId=3
-// studentId=3 will be removed in assignment 7.
+import {SERVER_URL} from '../../Constants';
 
 const CourseEnroll = (props) => {
      
-    const studentId = 3 
+    // student adds a course to their schedule
+
+    const [sections, setSections] = useState([]);
     const [message, setMessage] = useState('');
-    const headers = ['Section No', 'Semester', 'Course Id', 'Section Id', 'Room', 'Times', 'Instructor', 'Email', ''];
-    const [oCourses, setOCourses] = useState([
-        // {secNo: 1, year: 2024, semester: "summer", courseId: "cst438", secId: 1, building: "CompSci", room: "111", times: "", instructorName: "joshua gross", instructorEmail: "jgross@csumb.edu"},
-        // {secNo: 2, year: 2024, semester: "summer", courseId: "cst370", secId: 2, building: "CompSci", room: "110", times: "", instructorName: "joshua gross", instructorEmail: "jgross@csumb.edu"},
-        // {secNo: 3, year: 2024, semester: "summer", courseId: "cst338", secId: 3, building: "Art", room: "101", times: "", instructorName: "joshua gross", instructorEmail: "jgross@csumb.edu"},
-        // {secNo: 4, year: 2024, semester: "summer", courseId: "cst329", secId: 4, building: "CompSci", room: "104", times: "", instructorName: "joshua gross", instructorEmail: "jgross@csumb.edu"}
-    ]);
 
-    const fetchOpenCourses = async () => {
-        try{
+    const fetchSections = async () => {
+        // get list of open sections for enrollment
+        try {
             const response = await fetch(`${SERVER_URL}/sections/open`);
-
             if (response.ok) {
                 const data = await response.json();
-                setOCourses(data);
+                setSections(data);
             } else {
-                const r = await response.json();
-                setMessage("Error: "+ r.message);
+                const rc = await response.json();
+                setMessage(rc.message);
             }
-        } catch(err) {
-            setMessage("Error :"+err);
+        } catch (err) {
+            setMessage("network error "+err);
         }
     }
- 
+
     useEffect( () => {
-        fetchOpenCourses();
-    }, [] );
+        fetchSections();
+    }, []);
 
-    const enrollAlert = event => {
-        const row_index = event.target.parentNode.parentNode.rowIndex-1;
-        const selectedCourse = oCourses[row_index];
-        const selectedCourseSecNo = oCourses[row_index].secNo;
+    const addSection = async (secNo) => {
+        try {
+            const response = await fetch(`${SERVER_URL}/enrollments/sections/${secNo}?studentId=3`,
+                {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json',
+                    }, 
+                })
+            if (response.ok) {
+                const data = await response.json();
+                setMessage("section added. enrollment id=" + data.enrollmentId);
+            } else {
+                const rc = await response.json();
+                setMessage(rc.message);
+            }
+        } catch (err) {
+            setMessage("network error "+err);
+        }
+
+    }
+    
+    const onAdd = (e) => {
+        const row_idx = e.target.parentNode.parentNode.rowIndex - 1;
+        const secNo = sections[row_idx].secNo;
         confirmAlert({
-            title: 'Confirm to Enroll',
-            message: 'Confirm to enroll in Section: ' + selectedCourse.secNo +' '+ selectedCourse.courseId.toUpperCase() +' '+ selectedCourse.semester +'?',
+            title: 'Confirm to add',
+            message: 'Do you really want to add?',
             buttons: [
-                {
-                    label: 'Enroll',
-                    onClick: () => doEnroll(selectedCourseSecNo)
-                },
-                {
-                    label: 'Cancel',
-                }
+              {
+                label: 'Yes',
+                onClick: () => addSection(secNo)
+              },
+              {
+                label: 'No',
+              }
             ]
-        })
+          });
     }
 
-    const doEnroll = async (selectedCourseSecNo) => {
-        try {
-            const response = await fetch(`${SERVER_URL}/enrollments/sections/${selectedCourseSecNo}?studentId=${studentId}`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (response.ok) {
-                setMessage("You have enrolled in Section: " + selectedCourseSecNo /**+" "+ selectedCourse.courseId +" "+ selectedCourse.semester**/)
-                fetchOpenCourses();
-            } else {
-                const r = await response.json();
-                setMessage(r.message);
-            }
-
-        } catch(err) {
-            setMessage("Error: "+err);
-        }
-     }
+    const headers = ['section No', 'year', 'semster', 'course Id', 'section', 'title', 'building', 'room', 'times', 'instructor', ''];
 
     return(
-        <>
-            <h3>Open Courses</h3>
-
+        <div>
+            <h4>{message}</h4>
+            <h3>Open Sections Available for Enrollment</h3>
             <table className="Center">
                 <thead>
                     <tr>
-                        {headers.map((h,idx) => <th key={idx}>{h}</th>)}
+                        {headers.map((s, idx) => (<th key={idx}>{s}</th>))}
                     </tr>
                 </thead>
                 <tbody>
-                    {oCourses.map((oCourse) =>
-                        <tr key = {oCourse.secNo}>
-                            <td>{oCourse.secNo}</td>
-                            <td>{oCourse.semester}</td>
-                            <td>{oCourse.courseId}</td>
-                            <td>{oCourse.secId}</td>
-                            <td>{oCourse.room}</td>
-                            <td>{oCourse.times}</td>
-                            <td>{oCourse.instructorName}</td>
-                            <td>{oCourse.instructorEmail}</td>
-                            <td><Button onClick = {enrollAlert}>Enroll</Button></td>
-                        </tr>
-
-                    )}
-
+                    {sections.map((s) => (
+                            <tr key={s.secNo}>
+                                <td>{s.secNo}</td>
+                                <td>{s.year}</td>
+                                <td>{s.courseId}</td>
+                                <td>{s.secId}</td>
+                                <td>{s.title}</td>
+                                <td>{s.building}</td>
+                                <td>{s.room}</td>
+                                <td>{s.times}</td>
+                                <td>{s.instructorName}</td>
+                                <td><Button onClick={onAdd}>Add Course</Button></td>
+                            </tr>
+                        ))}
                 </tbody>
             </table>
-
-            <h4>{message}</h4>
-
-        </>
+        </div>
     );
 }
 
