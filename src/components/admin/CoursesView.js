@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
-import CourseUpdate from './CourseUpdate';
-import CourseAdd from './CourseAdd';
+import AdminCourseUpdate from './CourseUpdate';
+import AdminCourseAdd from './CourseAdd';
 import Button from '@mui/material/Button';
 import {SERVER_URL} from '../../Constants';
 
@@ -128,16 +128,16 @@ function CoursesView(props) {
                 <tbody>
                 {courses.map((c) => (
                         <tr key={c.courseId}>
-                        <td>{c.courseId}</td>
-                        <td>{c.title}</td>
-                        <td>{c.credits}</td>
-                        <td><CourseUpdate course={c} save={saveCourse} /></td>
-                        <td><Button onClick={onDelete}>Delete</Button></td>
+                            <td>{c.courseId}</td>
+                            <td>{c.title}</td>
+                            <td>{c.credits}</td>
+                            <td><AdminCourseUpdate course={c} save={saveCourse} /></td>
+                            <td><Button onClick={onDelete}>Delete</Button></td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            <CourseAdd save={addCourse} />
+            <AdminCourseAdd save={addCourse} />
         </div>
     );
 }

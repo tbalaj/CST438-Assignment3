@@ -1,61 +1,59 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import React, { useState } from 'react';
-import { SERVER_URL } from '../../Constants';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 
-//  instructor updates assignment title, dueDate 
-//  use an mui Dialog
-//  issue PUT to URL  /assignments with updated assignment
+const AssignmentUpdate = (props)  => {
 
-const AssignmentUpdate = ({ assignment, refresh }) => {
-  const [open, setOpen] = useState(false);
-  const [assign, setAssignment] = useState(assignment);
+    const [open, setOpen] = useState(false);
+    const [editMessage, setEditMessage] = useState('');
+    const [assignment, setAssignment] = useState({id:'', courseId:'', secId:' ', title:'', dueDate:''});
 
+    /*
+     *  dialog for edit of an assignment
+     */
+    const editOpen = () => {
+        setOpen(true);
+        setEditMessage('');
+        setAssignment(props.assignment);
+    };
 
-  // Handle the form submission
-  const handleUpdate = async () => {
-    try {
-      const response = await fetch(`${SERVER_URL}/assignments`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(assign)
-      });
-      if (response.ok) {
-        console.log('Assignment updated successfully');
-      } else {
-        console.error('Failed to update assignment');
-      }
-    } catch (error) {
-      console.error('Error updating assignment:', error);
+    const editClose = () => {
+        setOpen(false);
+        setAssignment({id:'', courseId:'', secId:' ', title:'', dueDate:''});
+        setEditMessage('');
+    };
+
+    const editChange = (event) => {
+        setAssignment({...assignment,  [event.target.name]:event.target.value})
     }
-    refresh();
-    toggle()
-  };
-  const toggle = () => {
-    setOpen(open => !open);
-    setAssignment(assignment);
-  }
-  const editChange = (event) => {
-    setAssignment({ ...assign, [event.target.name]: event.target.value })
-  }
-  return (
-    <div>
-      <Button id="editAssignment" onClick={toggle}>Edit</Button>
-      <Dialog open={open} >
-        <DialogTitle>Edit Assignment</DialogTitle>
-        <DialogContent style={{ paddingTop: 20 }} >
-          <TextField id="etitle" style={{ padding: 10 }} fullWidth label="title" name="title" value={assign.title} onChange={editChange} />
-          <TextField id="edueDate" style={{ padding: 10 }} fullWidth label="dueDate" name="dueDate" value={assign.dueDate} onChange={editChange} />
 
-        </DialogContent>
-        <DialogActions>
-          <Button id="close" color="secondary" onClick={toggle}>Close</Button>
-          <Button id="save" color="primary" onClick={handleUpdate}>Save</Button>
-        </DialogActions>
-      </Dialog>
-    </div>
-  );
-};
+    const onSave = () => {
+        props.save(assignment);
+        editClose();
+    }
+
+    return (
+        <>
+            <Button onClick={editOpen}>Edit</Button>
+            <Dialog open={open} >
+                <DialogTitle>Edit Assignment</DialogTitle>
+                <DialogContent  style={{paddingTop: 20}} >
+                    <h4>{editMessage}</h4>
+                    <TextField style={{padding:10}} autoFocus fullWidth label="id" name="id" value={assignment.id} InputProps={{readOnly: true, }}  /> 
+                    <TextField style={{padding:10}} autoFocus fullWidth label="title" name="title" value={assignment.title} onChange={editChange}  /> 
+                    <TextField style={{padding:10}} fullWidth label="dueDate" name="dueDate" value={assignment.dueDate} onChange={editChange}  /> 
+                </DialogContent>
+                <DialogActions>
+                    <Button color="secondary" onClick={editClose}>Close</Button>
+                    <Button color="primary" onClick={onSave}>Save</Button>
+                </DialogActions>
+            </Dialog> 
+        </>                       
+    )
+}
 
 export default AssignmentUpdate;

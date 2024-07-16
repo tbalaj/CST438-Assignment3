@@ -1,108 +1,58 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import React, { useState } from 'react';
-import { SERVER_URL } from '../../Constants';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 
-// complete the code.  
-// instructor adds an assignment to a section
-// use mui Dialog with assignment fields Title and DueDate
-// issue a POST using URL /assignments to add the assignment
+const AssignmentAdd = (props) => {
 
-const AssignmentAdd = ({ refresh }) => {
     const [open, setOpen] = useState(false);
-    const [newAssignment, setNewAssignment] = useState({ title: '', dueDate: '', secNo: '' });
+    const [editMessage, setEditMessage] = useState('');
+    const [assignment, setAssignment] = useState({ title: '', dueDate: '' });
 
-    // Toggle the dialog open/closed
-    const toggle = () => {
-        setOpen(prevOpen => !prevOpen);
-        if (open) {
-            setNewAssignment({ title: '', dueDate: '', secNo: '' }); // Reset form
-        }
+    /*
+     *  dialog for add assignment
+     */
+    const editOpen = () => {
+        setOpen(true);
+        setEditMessage('');
+        setAssignment({ title: '', dueDate: '' });
     };
 
-    // Handle changes to the input fields
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-        setNewAssignment(prev => ({ ...prev, [name]: value }));
+    const editClose = () => {
+        setOpen(false);
+        setAssignment({ title: '', dueDate: '' });
+        setEditMessage('');
     };
 
-    // Add new assignment
-    const handleAdd = async () => {
-        try {
-            const response = await fetch(`${SERVER_URL}/assignments`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newAssignment) // Ensure this includes 'secNo'
-            });
+    const editChange = (event) => {
+        setAssignment({ ...assignment, [event.target.name]: event.target.value })
+    }
 
-            if (response.ok) {
-                console.log('Assignment added successfully');
-                if (typeof refresh === 'function') {
-                    refresh(); // Refresh the assignment list
-                } else {
-                    console.error('Refresh is not a function');
-                }
-                toggle(); // Close the dialog
-            } else {
-                const errorText = await response.text();
-                console.error('Failed to add assignment:', errorText);
-            }
-        } catch (error) {
-            console.error('Error adding assignment:', error);
-        }
-    };
+    const onSave = () => {
+        props.save(assignment);
+        editClose();
+    }
 
     return (
         <>
-            <Button onClick={toggle} variant="contained" color="primary">
-                Add Assignment
-            </Button>
-            <Dialog open={open} onClose={toggle}>
+            <Button id='addAssignment' onClick={editOpen}>Add Assignment</Button>
+            <Dialog open={open} >
                 <DialogTitle>Add Assignment</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        id="title"
-                        fullWidth
-                        label="Title"
-                        name="title"
-                        value={newAssignment.title}
-                        onChange={handleChange}
-                        margin="normal"
-                        variant="outlined"
-                    />
-                    <TextField
-                        id="dueDate"
-                        fullWidth
-                        label="Due Date (YYYY-MM-DD)"
-                        name="dueDate"
-                        value={newAssignment.dueDate}
-                        onChange={handleChange}
-                        margin="normal"
-                        variant="outlined"
-                    />
-                    <TextField
-                        id="secNo"
-                        fullWidth
-                        label="Section Number"
-                        name="secNo"
-                        value={newAssignment.secNo}
-                        onChange={handleChange}
-                        margin="normal"
-                        variant="outlined"
-                    />
+                <DialogContent style={{ paddingTop: 20 }} >
+                    <h4>{editMessage}</h4>
+                    <TextField id='assignTitle' style={{ padding: 10 }} autoFocus fullWidth label="title" name="title" value={assignment.title} onChange={editChange} />
+                    <TextField id='assignDueDate' style={{ padding: 10 }} fullWidth label="dueDate" name="dueDate" value={assignment.dueDate} onChange={editChange} />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={toggle} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleAdd} color="primary">
-                        Save
-                    </Button>
+                    <Button id="close" color="secondary" onClick={editClose}>Close</Button>
+                    <Button id="save" color="primary" onClick={onSave}>Save</Button>
                 </DialogActions>
             </Dialog>
         </>
-    );
-};
+    )
+}
 
 export default AssignmentAdd;

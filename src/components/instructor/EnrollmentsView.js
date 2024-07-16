@@ -1,102 +1,97 @@
-import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import Button from '@mui/material/Button';
 import { SERVER_URL } from '../../Constants';
 
 
-// instructor view list of students enrolled in a section 
-// use location to get section no passed from InstructorSectionsView
-// fetch the enrollments using URL /sections/{secNo}/enrollments
-// display table with columns
-//   'enrollment id', 'student id', 'name', 'email', 'grade'
-//  grade column is an input field
-//  hint:  <input type="text" name="grade" value={e.grade} onChange={onGradeChange} />
+const EnrollmentsView = (props) => {
 
-const EnrollmentsView = () => {
     const [enrollments, setEnrollments] = useState([]);
+    const [message, setMessage] = useState('');
+
     const location = useLocation();
     const { secNo, courseId, secId } = location.state;
 
-    const fetchEnrolements = async () => {
+    const fetchEnrollments = async () => {
+
+        if (!secNo) return;
         try {
-            const url = `${SERVER_URL}/sections/${secNo}/enrollments`;
-            const response = await fetch(url);
+            const response = await fetch(`${SERVER_URL}/sections/${secNo}/enrollments`);
             if (response.ok) {
                 const data = await response.json();
                 setEnrollments(data);
             } else {
-                const json = await response.json();
+                const rc = await response.json();
+                setMessage(rc.message);
             }
         } catch (err) {
+            setMessage("network error: " + err);
+        }
+    }
+    // eslint-disable-next-line
+    useEffect(() => { fetchEnrollments() }, []);
 
+    const saveGrades = async () => {
+        try {
+            const response = await fetch(
+                `${SERVER_URL}/enrollments`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(enrollments),
+                });
+            if (response.ok) {
+                setMessage("Grades saved");
+                fetchEnrollments();
+            } else {
+                const rc = await response.json();
+                setMessage(rc.message);
+            }
+        } catch (err) {
+            setMessage("network error: " + err);
         }
     }
 
-    useEffect(() => {
-        fetchEnrolements();
-    }, []);
-
-    const handleGradeChange = (index, newGrade) => {
-        const updatedEnrollments = enrollments.map((enrollment, i) => {
-            if (i === index) {
-                return { ...enrollment, grade: newGrade };
-            }
-            return enrollment;
-        });
-        setEnrollments(updatedEnrollments);
-    };
-    const submit = async (enrollment) => {
-        try {
-            const response = await fetch (`${SERVER_URL}/enrollments`, 
-            {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              }, 
-              body: JSON.stringify([enrollment])
-            });
-           
-          } catch (err) {
-          }
+    const onGradeChange = (e) => {
+        const copy_enrollments = enrollments.map((x) => x);
+        const row_idx = e.target.parentNode.parentNode.rowIndex - 1;
+        copy_enrollments[row_idx] = { ...(copy_enrollments[row_idx]), grade: e.target.value };
+        setEnrollments(copy_enrollments);
     }
+
+    const headers = ['enrollment id', 'student id', 'name', 'email', 'grade'];
+
     return (
         <>
-            <h3>Enrollments Overview</h3>
-            <Button variant="outlined" onClick={fetchEnrolements} style={{ marginBottom: '20px' }}>Refresh Entrolments</Button>
+            <h3>{message}</h3>
 
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Enrollment ID</TableCell>
-                            <TableCell>Student ID</TableCell>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Email</TableCell>
-                            <TableCell>Grade</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {enrollments.map((enrollment, index) => (
-                            <TableRow key={index}>
-                                <TableCell>{enrollment.id}</TableCell>
-                                <TableCell>{enrollment.studentId}</TableCell>
-                                <TableCell>{enrollment.name}</TableCell>
-                                <TableCell>{enrollment.email}</TableCell>
-                                <TableCell>
-                                    <TextField
-                                        type="text"
-                                        value={enrollment.grade}
-                                        onChange={(e) => handleGradeChange(index, e.target.value)}
-                                        variant="outlined"
-                                        size="small"
-                                    /><Button onClick={()=> submit(enrollment)}> update </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            {enrollments.length > 0 &&
+                <>
+                    <h3> {courseId}-{secId} Enrollments</h3>
 
+                    <table className="Center" >
+                        <thead>
+                            <tr>
+                                {headers.map((s, idx) => (<th key={idx}>{s}</th>))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {enrollments.map((e) => (
+                                <tr key={e.enrollmentId}>
+                                    <td>{e.enrollmentId}</td>
+                                    <td>{e.studentId}</td>
+                                    <td>{e.name}</td>
+                                    <td>{e.email}</td>
+                                    <td><input type="text" name="grade" value={(e.grade) ? e.grade : ''} onChange={onGradeChange} /></td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <Button onClick={saveGrades}>Save Grades</Button>
+                </>
+            }
         </>
     );
 }
