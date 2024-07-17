@@ -22,7 +22,7 @@ export const StudentLayout = () => {
         <Link to="/">Home</Link> &nbsp;|&nbsp;   
         <Link to="/schedule">VIew Class Schedule</Link>&nbsp;|&nbsp;  
         <Link to="/addCourse">Enroll in a class</Link>&nbsp;|&nbsp;
-        <Link to="/studentAssignments">View Assignments</Link>&nbsp;|&nbsp;  
+        <Link to="/studentAssignments" id="assignments">View Assignments</Link>&nbsp;|&nbsp;
         <Link to="/transcript">View Transcript</Link>
       </nav>
 
