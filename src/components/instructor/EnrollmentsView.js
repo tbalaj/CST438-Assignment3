@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Button from '@mui/material/Button';
-import { SERVER_URL } from '../../Constants';
+import { GRADEBOOK_URL } from '../../Constants';
 
 
 const EnrollmentsView = (props) => {
@@ -16,7 +16,7 @@ const EnrollmentsView = (props) => {
 
         if (!secNo) return;
         try {
-            const response = await fetch(`${SERVER_URL}/sections/${secNo}/enrollments`);
+            const response = await fetch(`${GRADEBOOK_URL}/sections/${secNo}/enrollments`);
             if (response.ok) {
                 const data = await response.json();
                 setEnrollments(data);
@@ -34,7 +34,7 @@ const EnrollmentsView = (props) => {
     const saveGrades = async () => {
         try {
             const response = await fetch(
-                `${SERVER_URL}/enrollments`,
+                `${GRADEBOOK_URL}/enrollments`,
                 {
                     method: 'PUT',
                     headers: {

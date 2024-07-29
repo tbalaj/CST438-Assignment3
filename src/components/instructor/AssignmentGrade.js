@@ -4,7 +4,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
-import {SERVER_URL} from '../../Constants';
+import {GRADEBOOK_URL} from '../../Constants';
 
 const AssignmentGrade = (props) => {
 
@@ -21,7 +21,7 @@ const AssignmentGrade = (props) => {
 
     const fetchGrades = async (id) => {
         try {
-            const response = await fetch(`${SERVER_URL}/assignments/${id}/grades`);
+            const response = await fetch(`${GRADEBOOK_URL}/assignments/${id}/grades`);
             if (response.ok) {
                 const data = await response.json();
                 setGrades(data);
@@ -36,7 +36,7 @@ const AssignmentGrade = (props) => {
 
     const onSave = async () => {
         try { 
-            const response = await fetch (`${SERVER_URL}/grades`, 
+            const response = await fetch (`${GRADEBOOK_URL}/grades`,
                 {
                 method: 'PUT',
                 headers: {

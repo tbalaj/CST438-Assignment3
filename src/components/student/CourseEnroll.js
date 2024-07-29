@@ -2,10 +2,10 @@ import React, {useState, useEffect} from 'react';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import Button from '@mui/material/Button';
-import {SERVER_URL} from '../../Constants';
+import {GRADEBOOK_URL} from '../../Constants';
 
 const CourseEnroll = (props) => {
-     
+
     // student adds a course to their schedule
 
     const [sections, setSections] = useState([]);
@@ -14,7 +14,7 @@ const CourseEnroll = (props) => {
     const fetchSections = async () => {
         // get list of open sections for enrollment
         try {
-            const response = await fetch(`${SERVER_URL}/sections/open`);
+            const response = await fetch(`${GRADEBOOK_URL}/sections/open`);
             if (response.ok) {
                 const data = await response.json();
                 setSections(data);
@@ -33,12 +33,12 @@ const CourseEnroll = (props) => {
 
     const addSection = async (secNo) => {
         try {
-            const response = await fetch(`${SERVER_URL}/enrollments/sections/${secNo}?studentId=3`,
+            const response = await fetch(`${GRADEBOOK_URL}/enrollments/sections/${secNo}?studentId=3`,
                 {
                     method: 'POST',
                     headers: {
-                    'Content-Type': 'application/json',
-                    }, 
+                        'Content-Type': 'application/json',
+                    },
                 })
             if (response.ok) {
                 const data = await response.json();
@@ -52,7 +52,7 @@ const CourseEnroll = (props) => {
         }
 
     }
-    
+
     const onAdd = (e) => {
         const row_idx = e.target.parentNode.parentNode.rowIndex - 1;
         const secNo = sections[row_idx].secNo;
@@ -60,15 +60,15 @@ const CourseEnroll = (props) => {
             title: 'Confirm to add',
             message: 'Do you really want to add?',
             buttons: [
-              {
-                label: 'Yes',
-                onClick: () => addSection(secNo)
-              },
-              {
-                label: 'No',
-              }
+                {
+                    label: 'Yes',
+                    onClick: () => addSection(secNo)
+                },
+                {
+                    label: 'No',
+                }
             ]
-          });
+        });
     }
 
     const headers = ['section No', 'year', 'semster', 'course Id', 'section', 'title', 'building', 'room', 'times', 'instructor', ''];
@@ -79,25 +79,25 @@ const CourseEnroll = (props) => {
             <h3>Open Sections Available for Enrollment</h3>
             <table className="Center">
                 <thead>
-                    <tr>
-                        {headers.map((s, idx) => (<th key={idx}>{s}</th>))}
-                    </tr>
+                <tr>
+                    {headers.map((s, idx) => (<th key={idx}>{s}</th>))}
+                </tr>
                 </thead>
                 <tbody>
-                    {sections.map((s) => (
-                            <tr key={s.secNo}>
-                                <td>{s.secNo}</td>
-                                <td>{s.year}</td>
-                                <td>{s.courseId}</td>
-                                <td>{s.secId}</td>
-                                <td>{s.title}</td>
-                                <td>{s.building}</td>
-                                <td>{s.room}</td>
-                                <td>{s.times}</td>
-                                <td>{s.instructorName}</td>
-                                <td><Button onClick={onAdd}>Add Course</Button></td>
-                            </tr>
-                        ))}
+                {sections.map((s) => (
+                    <tr key={s.secNo}>
+                        <td>{s.secNo}</td>
+                        <td>{s.year}</td>
+                        <td>{s.courseId}</td>
+                        <td>{s.secId}</td>
+                        <td>{s.title}</td>
+                        <td>{s.building}</td>
+                        <td>{s.room}</td>
+                        <td>{s.times}</td>
+                        <td>{s.instructorName}</td>
+                        <td><Button onClick={onAdd}>Add Course</Button></td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
         </div>
