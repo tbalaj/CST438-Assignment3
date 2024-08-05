@@ -1,23 +1,29 @@
-import React, {useState, useEffect} from 'react';
-import { Link } from "react-router-dom";
-import {useLocation} from 'react-router-dom';
-import {SERVER_URL} from '../../Constants';
-
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { SERVER_URL } from '../../Constants';
 
 const InstructorSectionsView = (props) => {
-
     const [sections, setSections] = useState([]);
     const [message, setMessage] = useState('');
 
     const location = useLocation();
-    const {year, semester} = location.state;
+    const { year, semester } = location.state;
 
-    const fetchSections = async (year, semester) => {
-        if (!year || year==='' || !semester || semester==='') {
-            setMessage("enter year and semester")
+    const getJwtToken = () => localStorage.getItem('jwtToken'); // or sessionStorage.getItem('jwtToken');
+
+    const fetchSections = useCallback(async (year, semester) => {
+        if (!year || year === '' || !semester || semester === '') {
+            setMessage("Enter year and semester");
+            return;
         }
+
         try {
-            const response = await fetch(`${SERVER_URL}/sections?email=dwisneski@csumb.edu&year=${year}&semester=${semester}`);
+            const response = await fetch(`${SERVER_URL}/sections?email=dwisneski@csumb.edu&year=${year}&semester=${semester}`, {
+                headers: {
+                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                }
+            });
+
             if (response.ok) {
                 const data = await response.json();
                 setSections(data);
@@ -25,35 +31,33 @@ const InstructorSectionsView = (props) => {
                 const rc = await response.json();
                 setMessage(rc.message);
             }
-        } catch(err) {
-            setMessage("network error "+err);
+        } catch (err) {
+            setMessage("Network error: " + err);
         }
-    }
+    }, [year, semester]);
 
-   useEffect( () => {
-    fetchSections(year, semester);
-    }, [year, semester ]);
+    useEffect(() => {
+        fetchSections(year, semester);
+    }, [fetchSections, year, semester]);
 
     const headers = ['secNo', 'course id', 'sec id', 'building', 'room', 'times', '', ''];
 
-    
-     
-    return(
-        <div> 
-            <h3>{message}</h3>   
-            { sections.length > 0 && 
-                <> 
-                    <h3>Sections {year} {semester} </h3>   
-                    
-                    <table className="Center" > 
+    return (
+        <div>
+            <h3>{message}</h3>
+            {sections.length > 0 &&
+                <>
+                    <h3>Sections {year} {semester}</h3>
+
+                    <table className="Center">
                         <thead>
                         <tr>
                             {headers.map((s, idx) => (<th key={idx}>{s}</th>))}
                         </tr>
                         </thead>
                         <tbody>
-                            {sections.map((s) => (
-                                <tr key={s.secNo}>
+                        {sections.map((s) => (
+                            <tr key={s.secNo}>
                                 <td>{s.secNo}</td>
                                 <td>{s.courseId}</td>
                                 <td>{s.secId}</td>
@@ -62,8 +66,8 @@ const InstructorSectionsView = (props) => {
                                 <td>{s.times}</td>
                                 <td><Link to="/enrollments" state={s}>Enrollments</Link></td>
                                 <td><Link to="/assignments" state={s}>Assignments</Link></td>
-                                </tr>
-                            ))}
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                 </>
@@ -73,4 +77,3 @@ const InstructorSectionsView = (props) => {
 }
 
 export default InstructorSectionsView;
-

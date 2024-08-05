@@ -12,9 +12,7 @@ const CourseAdd = (props)  => {
     const [editMessage, setEditMessage] = useState('');
     const [course, setCourse] = useState({courseId:'', title:'', credits:''});
 
-    /*
-     *  dialog for add course
-     */
+
     const editOpen = () => {
         setOpen(true);
         setEditMessage('');

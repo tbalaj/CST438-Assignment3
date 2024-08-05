@@ -4,17 +4,22 @@ import Button from '@mui/material/Button';
 import { SERVER_URL } from '../../Constants';
 
 const EnrollmentsView = (props) => {
-
     const [enrollments, setEnrollments] = useState([]);
     const [message, setMessage] = useState('');
 
     const location = useLocation();
     const { secNo, courseId, secId } = location.state;
 
+    const getJwtToken = () => localStorage.getItem('jwtToken'); // or sessionStorage.getItem('jwtToken');
+
     const fetchEnrollments = useCallback(async () => {
         if (!secNo) return;
         try {
-            const response = await fetch(`${SERVER_URL}/sections/${secNo}/enrollments`);
+            const response = await fetch(`${SERVER_URL}/sections/${secNo}/enrollments`, {
+                headers: {
+                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setEnrollments(data);
@@ -33,15 +38,14 @@ const EnrollmentsView = (props) => {
 
     const saveGrades = async () => {
         try {
-            const response = await fetch(
-                `${SERVER_URL}/enrollments`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(enrollments),
-                });
+            const response = await fetch(`${SERVER_URL}/enrollments`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                },
+                body: JSON.stringify(enrollments),
+            });
             if (response.ok) {
                 setMessage("Grades saved");
                 fetchEnrollments();
@@ -69,7 +73,7 @@ const EnrollmentsView = (props) => {
 
             {enrollments.length > 0 &&
                 <>
-                    <h3> {courseId}-{secId} Enrollments</h3>
+                    <h3>{courseId}-{secId} Enrollments</h3>
 
                     <table className="Center">
                         <thead>

@@ -8,6 +8,8 @@ import AssignmentAdd from './AssignmentAdd';
 import AssignmentUpdate from './AssignmentUpdate';
 import AssignmentGrade from './AssignmentGrade';
 
+const getJwtToken = () => sessionStorage.getItem('jwt');
+
 const AssignmentsView = (props) => {
 
     const [assignments, setAssignments] = useState([]);
@@ -17,8 +19,13 @@ const AssignmentsView = (props) => {
     const { secNo, courseId, secId } = location.state;
 
     const fetchAssignments = useCallback(async () => {
+        const jwt = getJwtToken();
         try {
-            const response = await fetch(`${SERVER_URL}/sections/${secNo}/assignments`);
+            const response = await fetch(`${SERVER_URL}/sections/${secNo}/assignments`, {
+                headers: {
+                    'Authorization': jwt,
+                },
+            });
             if (response.ok) {
                 const data = await response.json();
                 setAssignments(data);
@@ -39,14 +46,15 @@ const AssignmentsView = (props) => {
         assignment.courseId = courseId;
         assignment.secId = secId;
         assignment.secNo = secNo;
-        fetch(`${SERVER_URL}/assignments`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(assignment),
-            })
+        const jwt = getJwtToken();
+        fetch(`${SERVER_URL}/assignments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': jwt,
+            },
+            body: JSON.stringify(assignment),
+        })
             .then(response => response.json())
             .then(data => {
                 setMessage("Assignment created id=" + data.id);
@@ -56,14 +64,15 @@ const AssignmentsView = (props) => {
     }
 
     const save = (assignment) => {
-        fetch(`${SERVER_URL}/assignments`,
-            {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(assignment),
-            })
+        const jwt = getJwtToken();
+        fetch(`${SERVER_URL}/assignments`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': jwt,
+            },
+            body: JSON.stringify(assignment),
+        })
             .then(response => response.json())
             .then(data => {
                 setMessage("Assignment saved");
@@ -75,13 +84,14 @@ const AssignmentsView = (props) => {
     const doDelete = (e) => {
         const row_idx = e.target.parentNode.parentNode.rowIndex - 1;
         const id = assignments[row_idx].id;
-        fetch(`${SERVER_URL}/assignments/${id}`,
-            {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
+        const jwt = getJwtToken();
+        fetch(`${SERVER_URL}/assignments/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': jwt,
+            },
+        })
             .then(response => {
                 if (response.ok) {
                     setMessage("Assignment deleted");

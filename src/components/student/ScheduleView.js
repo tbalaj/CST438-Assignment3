@@ -1,21 +1,23 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import Button from '@mui/material/Button';
-import {SERVER_URL} from '../../Constants';
+import { SERVER_URL } from '../../Constants';
 
 const ScheduleView = (props) => {
-    
-    // student views their class schedule for a given term
-
-    const [term, setTerm] = useState( {year:'', semester:''  })
+    const [term, setTerm] = useState({ year: '', semester: '' });
     const [enrollments, setEnrollments] = useState([]);
     const [message, setMessage] = useState('');
 
-   
+    const getJwtToken = () => sessionStorage.getItem('jwtToken'); // or localStorage.getItem('jwtToken')
+
     const fetchEnrollments = async () => {
-             try {
-            const response = await fetch(`${SERVER_URL}/enrollments?studentId=3&year=${term.year}&semester=${term.semester}`);
+        try {
+            const response = await fetch(`${SERVER_URL}/enrollments?studentId=3&year=${term.year}&semester=${term.semester}`, {
+                headers: {
+                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setEnrollments(data);
@@ -24,81 +26,82 @@ const ScheduleView = (props) => {
                 setMessage(rc.message);
             }
         } catch (err) {
-            setMessage("network error "+err);
+            setMessage("network error " + err);
         }
     }
 
     const dropCourse = async (enrollmentId) => {
         try {
-            const response = await fetch(`${SERVER_URL}/enrollments/${enrollmentId}`,
-                {
-                    method: 'DELETE',
-                });
+            const response = await fetch(`${SERVER_URL}/enrollments/${enrollmentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                }
+            });
             if (response.ok) {
-                setMessage("course dropped");
+                setMessage("Course dropped");
                 fetchEnrollments();
             } else {
                 const rc = await response.json();
-                setMessage("course drop failed "+rc.message);
+                setMessage("Course drop failed " + rc.message);
             }
         } catch (err) {
-            setMessage("network error "+err);
+            setMessage("network error " + err);
         }
     }
 
     const onDelete = (e) => {
-      const row_idx = e.target.parentNode.parentNode.rowIndex - 1;
-      const enrollmentId = enrollments[row_idx].enrollmentId;
-      confirmAlert({
-          title: 'Confirm to drop',
-          message: 'Do you really want to drop this course?',
-          buttons: [
-            {
-              label: 'Yes',
-              onClick: () => dropCourse(enrollmentId)
-            },
-            {
-              label: 'No',
-            }
-          ]
+        const row_idx = e.target.parentNode.parentNode.rowIndex - 1;
+        const enrollmentId = enrollments[row_idx].enrollmentId;
+        confirmAlert({
+            title: 'Confirm to drop',
+            message: 'Do you really want to drop this course?',
+            buttons: [
+                {
+                    label: 'Yes',
+                    onClick: () => dropCourse(enrollmentId)
+                },
+                {
+                    label: 'No',
+                }
+            ]
         });
     }
 
     const onChange = (event) => {
-        setTerm({...term, [event.target.name]:event.target.value});
+        setTerm({ ...term, [event.target.name]: event.target.value });
     }
 
+    const headings = ["enrollmentId", "secNo", "courseId", "secId", "building", "room", "times", ""];
 
-    const headings = ["enrollmentId", "secNo", "courseId", "secId", "building", "room", "times",  ""];
-
-    return(
-        <div> 
+    return (
+        <div>
             <h3>Enter year and semester</h3>
             <h4>{message}</h4>
             <table className="Center">
                 <tbody>
-                    <tr>
-                        <td>Year</td>
-                        <td><input type="text" name="year" id="year" value={term.year} onChange={onChange} /></td>
-                    </tr>
-                    <tr>
-                        <td>Semester</td>
-                        <td><input type="text" name="semester" id="semester" value={term.semester} onChange={onChange} /></td>
-                    </tr>
+                <tr>
+                    <td>Year</td>
+                    <td><input type="text" name="year" id="year" value={term.year} onChange={onChange} /></td>
+                </tr>
+                <tr>
+                    <td>Semester</td>
+                    <td><input type="text" name="semester" id="semester" value={term.semester} onChange={onChange} /></td>
+                </tr>
                 </tbody>
             </table>
-            
+
             <button type="submit" onClick={fetchEnrollments}>Get Schedule</button>
-            <br/> 
-            <br/>
+            <br />
+            <br />
             <table className="Center">
                 <thead>
-                    <tr>
-                       { headings.map( (h, idx) => <th key={idx}>{h}</th>) }
-                    </tr>
+                <tr>
+                    {headings.map((h, idx) => <th key={idx}>{h}</th>)}
+                </tr>
                 </thead>
                 <tbody>
-                { enrollments.map( (s) => 
+                {enrollments.map((s) =>
                     <tr key={s.enrollmentId}>
                         <td>{s.enrollmentId}</td>
                         <td>{s.sectionNo}</td>
@@ -109,13 +112,11 @@ const ScheduleView = (props) => {
                         <td>{s.times}</td>
                         <td><Button onClick={onDelete}>Drop</Button></td>
                     </tr>
-                 )}
+                )}
                 </tbody>
             </table>
-           
         </div>
     );
-
 }
 
 export default ScheduleView;

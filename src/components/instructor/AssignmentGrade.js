@@ -4,14 +4,14 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
-import {SERVER_URL} from '../../Constants';
+import { SERVER_URL } from '../../Constants';
 
 const AssignmentGrade = (props) => {
-
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [grades, setGrades] = useState([]);
 
+    const getJwtToken = () => sessionStorage.getItem('jwt');
 
     const editOpen = () => {
         setOpen(true);
@@ -20,8 +20,13 @@ const AssignmentGrade = (props) => {
     };
 
     const fetchGrades = async (id) => {
+        const jwt = getJwtToken();
         try {
-            const response = await fetch(`${SERVER_URL}/assignments/${id}/grades`);
+            const response = await fetch(`${SERVER_URL}/assignments/${id}/grades`, {
+                headers: {
+                    'Authorization': jwt,
+                },
+            });
             if (response.ok) {
                 const data = await response.json();
                 setGrades(data);
@@ -30,20 +35,21 @@ const AssignmentGrade = (props) => {
                 setMessage(rc.message);
             }
         } catch (err) {
-            setMessage("network error "+err);
+            setMessage("network error " + err);
         }
     }
 
     const onSave = async () => {
-        try { 
-            const response = await fetch (`${SERVER_URL}/grades`, 
-                {
+        const jwt = getJwtToken();
+        try {
+            const response = await fetch(`${SERVER_URL}/grades`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                }, 
+                    'Authorization': jwt,
+                },
                 body: JSON.stringify(grades),
-                });
+            });
             if (response.ok) {
                 setMessage("Grades saved");
             } else {
@@ -51,7 +57,7 @@ const AssignmentGrade = (props) => {
                 setMessage(rc.message);
             }
         } catch (err) {
-            setMessage("network error "+err);
+            setMessage("network error " + err);
         }
     }
 
@@ -64,34 +70,34 @@ const AssignmentGrade = (props) => {
     const onChange = (e) => {
         const copy_grades = grades.map((x) => x);
         const row_idx = e.target.parentNode.parentNode.rowIndex - 1;
-        copy_grades[row_idx] = {...(copy_grades[row_idx]), score: e.target.value};
-        setGrades(copy_grades);   
+        copy_grades[row_idx] = { ...(copy_grades[row_idx]), score: e.target.value };
+        setGrades(copy_grades);
     }
 
-    const headers = ['gradeId', 'student name', 'student email', 'score' ];
-     
-    return(
+    const headers = ['gradeId', 'student name', 'student email', 'score'];
+
+    return (
         <>
             <Button onClick={editOpen}>Grade</Button>
             <Dialog open={open} >
                 <DialogTitle>Grade Assignment</DialogTitle>
-                <DialogContent  style={{paddingTop: 20}} >
+                <DialogContent style={{ paddingTop: 20 }}>
                     <h4>{message}</h4>
-                    <table className="Center" > 
+                    <table className="Center">
                         <thead>
-                            <tr>
-                                {headers.map((s, idx) => (<th key={idx}>{s}</th>))}
-                            </tr>
+                        <tr>
+                            {headers.map((s, idx) => (<th key={idx}>{s}</th>))}
+                        </tr>
                         </thead>
                         <tbody>
-                            {grades.map((g) => (
-                                    <tr key={g.gradeId}>
-                                    <td>{g.gradeId}</td>
-                                    <td>{g.studentName}</td>
-                                    <td>{g.studentEmail}</td>
-                                    <td><input type="text"  name="score" value={g.score}  onChange={onChange} /></td>
-                                    </tr>
-                                ))}
+                        {grades.map((g) => (
+                            <tr key={g.gradeId}>
+                                <td>{g.gradeId}</td>
+                                <td>{g.studentName}</td>
+                                <td>{g.studentEmail}</td>
+                                <td><input type="text" name="score" value={g.score} onChange={onChange} /></td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                 </DialogContent>
@@ -99,8 +105,8 @@ const AssignmentGrade = (props) => {
                     <Button color="secondary" onClick={editClose}>Close</Button>
                     <Button color="primary" onClick={onSave}>Save</Button>
                 </DialogActions>
-            </Dialog> 
-        </>          
+            </Dialog>
+        </>
     );
 }
 
