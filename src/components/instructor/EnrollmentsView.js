@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import { SERVER_URL } from '../../Constants';
-
 
 const EnrollmentsView = (props) => {
 
@@ -12,8 +11,7 @@ const EnrollmentsView = (props) => {
     const location = useLocation();
     const { secNo, courseId, secId } = location.state;
 
-    const fetchEnrollments = async () => {
-
+    const fetchEnrollments = useCallback(async () => {
         if (!secNo) return;
         try {
             const response = await fetch(`${SERVER_URL}/sections/${secNo}/enrollments`);
@@ -27,9 +25,11 @@ const EnrollmentsView = (props) => {
         } catch (err) {
             setMessage("network error: " + err);
         }
-    }
-    // eslint-disable-next-line
-    useEffect(() => { fetchEnrollments() }, []);
+    }, [secNo]);
+
+    useEffect(() => {
+        fetchEnrollments();
+    }, [fetchEnrollments]);
 
     const saveGrades = async () => {
         try {
@@ -71,22 +71,22 @@ const EnrollmentsView = (props) => {
                 <>
                     <h3> {courseId}-{secId} Enrollments</h3>
 
-                    <table className="Center" >
+                    <table className="Center">
                         <thead>
-                            <tr>
-                                {headers.map((s, idx) => (<th key={idx}>{s}</th>))}
-                            </tr>
+                        <tr>
+                            {headers.map((s, idx) => (<th key={idx}>{s}</th>))}
+                        </tr>
                         </thead>
                         <tbody>
-                            {enrollments.map((e) => (
-                                <tr key={e.enrollmentId}>
-                                    <td>{e.enrollmentId}</td>
-                                    <td>{e.studentId}</td>
-                                    <td>{e.name}</td>
-                                    <td>{e.email}</td>
-                                    <td><input type="text" name="grade" value={(e.grade) ? e.grade : ''} onChange={onGradeChange} /></td>
-                                </tr>
-                            ))}
+                        {enrollments.map((e) => (
+                            <tr key={e.enrollmentId}>
+                                <td>{e.enrollmentId}</td>
+                                <td>{e.studentId}</td>
+                                <td>{e.name}</td>
+                                <td>{e.email}</td>
+                                <td><input type="text" name="grade" value={(e.grade) ? e.grade : ''} onChange={onGradeChange} /></td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                     <Button onClick={saveGrades}>Save Grades</Button>
