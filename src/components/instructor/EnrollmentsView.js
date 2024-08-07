@@ -10,14 +10,14 @@ const EnrollmentsView = (props) => {
     const location = useLocation();
     const { secNo, courseId, secId } = location.state;
 
-    const getJwtToken = () => localStorage.getItem('jwtToken'); // or sessionStorage.getItem('jwtToken');
+  const getJwtToken = () => sessionStorage.getItem('jwt'); // or sessionStorage.getItem('jwtToken');
 
     const fetchEnrollments = useCallback(async () => {
         if (!secNo) return;
         try {
             const response = await fetch(`${SERVER_URL}/sections/${secNo}/enrollments`, {
                 headers: {
-                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                    'Authorization': getJwtToken() // Include JWT in header
                 }
             });
             if (response.ok) {
@@ -42,7 +42,7 @@ const EnrollmentsView = (props) => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                    'Authorization': getJwtToken() // Include JWT in header
                 },
                 body: JSON.stringify(enrollments),
             });

@@ -5,13 +5,13 @@ const Transcript = (props) => {
     const [message, setMessage] = useState('');
     const [courses, setCourses] = useState([]);
 
-    const getJwtToken = () => sessionStorage.getItem('jwtToken'); // or localStorage.getItem('jwtToken')
+    const getJwtToken = () => sessionStorage.getItem('jwt'); // or localStorage.getItem('jwtToken')
 
     const fetchData = async () => {
         try {
             const response = await fetch(`${SERVER_URL}/transcripts?studentId=3`, {
                 headers: {
-                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                    'Authorization': getJwtToken() // Include JWT in header
                 }
             });
             if (response.ok) {

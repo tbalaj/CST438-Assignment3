@@ -6,14 +6,14 @@ const AssignmentsStudentView = (props) => {
     const [assignments, setAssignments] = useState([]);
     const [term, setTerm] = useState({ year: '', semester: '' });
 
-    const getJwtToken = () => sessionStorage.getItem('jwtToken'); // or localStorage.getItem('jwtToken')
+    const getJwtToken = () => sessionStorage.getItem('jwt'); // or localStorage.getItem('jwtToken')
 
     const fetchData = async () => {
         sessionStorage.setItem('term', JSON.stringify(term));
         try {
             const response = await fetch(`${SERVER_URL}/assignments?year=${term.year}&semester=${term.semester}`, {
                 headers: {
-                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                    'Authorization': getJwtToken() // Include JWT in header
                 }
             });
 

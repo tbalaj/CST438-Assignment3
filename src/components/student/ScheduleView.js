@@ -9,13 +9,14 @@ const ScheduleView = (props) => {
     const [enrollments, setEnrollments] = useState([]);
     const [message, setMessage] = useState('');
 
-    const getJwtToken = () => sessionStorage.getItem('jwtToken'); // or localStorage.getItem('jwtToken')
+    const getJwtToken = () => sessionStorage.getItem('jwt'); // or localStorage.getItem('jwtToken')
 
     const fetchEnrollments = async () => {
         try {
             const response = await fetch(`${SERVER_URL}/enrollments?studentId=3&year=${term.year}&semester=${term.semester}`, {
+            method:'GET',
                 headers: {
-                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                    'Authorization': getJwtToken() // Include JWT in header
                 }
             });
             if (response.ok) {
@@ -35,7 +36,7 @@ const ScheduleView = (props) => {
             const response = await fetch(`${SERVER_URL}/enrollments/${enrollmentId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                    'Authorization': getJwtToken() // Include JWT in header
                 }
             });
             if (response.ok) {

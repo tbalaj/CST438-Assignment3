@@ -9,7 +9,7 @@ const InstructorSectionsView = (props) => {
     const location = useLocation();
     const { year, semester } = location.state;
 
-    const getJwtToken = () => localStorage.getItem('jwtToken'); // or sessionStorage.getItem('jwtToken');
+  const getJwtToken = () => sessionStorage.getItem('jwt'); // or sessionStorage.getItem('jwtToken');
 
     const fetchSections = useCallback(async (year, semester) => {
         if (!year || year === '' || !semester || semester === '') {
@@ -20,7 +20,7 @@ const InstructorSectionsView = (props) => {
         try {
             const response = await fetch(`${SERVER_URL}/sections?email=dwisneski@csumb.edu&year=${year}&semester=${semester}`, {
                 headers: {
-                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                    'Authorization': getJwtToken() // Include JWT in header
                 }
             });
 

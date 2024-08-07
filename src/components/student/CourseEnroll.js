@@ -8,13 +8,13 @@ const CourseEnroll = (props) => {
     const [sections, setSections] = useState([]);
     const [message, setMessage] = useState('');
 
-    const getJwtToken = () => sessionStorage.getItem('jwtToken'); // or localStorage.getItem('jwtToken')
+    const getJwtToken = () => sessionStorage.getItem('jwt'); // or localStorage.getItem('jwtToken')
 
     const fetchSections = async () => {
         try {
             const response = await fetch(`${SERVER_URL}/sections/open`, {
                 headers: {
-                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                    'Authorization': getJwtToken() // Include JWT in header
                 }
             });
 
@@ -40,7 +40,7 @@ const CourseEnroll = (props) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getJwtToken()}` // Include JWT in header
+                    'Authorization': getJwtToken() // Include JWT in header
                 }
             });
 
